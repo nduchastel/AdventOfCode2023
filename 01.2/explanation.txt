@@ -1,0 +1,40 @@
+Command was
+     cat input.txt  | python text_to_digits.py | tr -d '\r' | awk '{print substr($0,1,1) substr($0,length)}' | awk '{t+=$0} END {print t}'
+
+How to run it:
+   On linux (unix types) should work just correctly in bash or sh shell. 
+   On Windows, should run in cygwin or other linux style shell with
+      bash command.cmd
+
+Explanation
+
+  the pipe (|) is used in command line to pass output from one command to the next one.
+    so   cmd_1 | cmd_2 | cmd_3
+    will execute cmd_1 and the text output (sent out to stdout) will go as input to
+    cmd_2 (aka stdin); and so on.
+
+  cat input.txt      -> just "dumps" entire text file of input.txt, line by line
+
+  python text_to_digits.py -> run python script.
+      read each line from STDIN
+      takes 1 letter or 1 word on the left until line is empty
+       -> if the 1st letter is a digit, use it!
+       -> if the start of the line is a valid "number word" (e.g. "one", "two",...) -> map it to a digit
+
+      Important:
+       * originally, once a word was found (e..g "one", "two",...) we would skip it,
+         thus, there couldn't be two digit extracted from sequence - i.e. words can share letters
+         e.g. "eightwo" would become "8wo"
+       * Now, we do want to share letters - i.e. "eightwo" -> "82"
+
+  tr -d "\r"  -> pythin prints \r\n (CTRL-LINEFEED) which confused awk, remove the \r and leave \n only.
+
+  awk ...            -> process line by line
+      substr(x,y,z)  -> print a sub-set of an  argument - $1 for first arg, $2 for 2nd arg 
+                                                          or $0 for "entire line"
+                            x = argument ($0 means "entire line")
+                            y = start - 1-based, so 1 is for frist character
+                            z = number of characters to print
+   substr($0,1,1)    -> print very first character of line
+   substr($0,length) -> print very last character of line - starting at length
+                               (no need to put z = number of charcter since we start at end
